@@ -71,11 +71,11 @@ export default function SettingsView({ range, onChange, onReset, autoScan, onAut
           <strong>Aktualizace</strong>
           <p>Verze: {meta?.version || '—'}</p>
           <p>
-            {meta?.autoUpdateEnabled
-              ? 'Po startu se kontrolují GitHub Releases.'
-              : meta?.packaged
-                ? 'Autoaktualizace na této platformě není aktivní.'
-                : 'V režimu vývoje se aktualizace nekontrolují — až v notarizovaném buildu.'}
+            {!meta?.packaged
+              ? 'V režimu vývoje se aktualizace nekontrolují — až v nainstalované aplikaci.'
+              : meta?.autoInstallEnabled
+                ? 'Po startu se kontrolují GitHub Releases; novou verzi jde stáhnout a nainstalovat automaticky.'
+                : 'Po startu se kontrolují GitHub Releases. Při nové verzi se zobrazí odkaz ke stažení (instalace je ruční).'}
           </p>
           <div className="form-row" style={{ marginTop: 8, gap: 8 }}>
             <button type="button" className="btn" disabled={busy} onClick={onCheckUpdates}>

@@ -4,6 +4,9 @@ import electronLog from 'electron-log'
 
 const { autoUpdater } = electronUpdater
 
+const RELEASES_URL = 'https://github.com/shaman12345677/Scanner/releases'
+const RELEASES_LATEST_URL = `${RELEASES_URL}/latest`
+
 autoUpdater.autoDownload = false
 autoUpdater.autoInstallOnAppQuit = true
 autoUpdater.logger = electronLog
@@ -17,8 +20,21 @@ function isPackaged() {
   return app.isPackaged
 }
 
-function updatesSupported() {
-  return isPackaged() && process.platform !== 'win32'
+/** Kontrola nové verze (mac + win). */
+function updateCheckSupported() {
+  return isPackaged()
+}
+
+/** Automatické stažení a instalace (jen macOS s podpisem). */
+function autoInstallSupported() {
+  return isPackaged() && process.platform === 'darwin'
+}
+
+function openDownloadPage(version) {
+  const url = version
+    ? `https://github.com/shaman12345677/Scanner/releases/tag/v${version}`
+    : RELEASES_LATEST_URL
+  return shell.openExternal(url)
 }
 
 export function setupAutoUpdater() {
@@ -30,24 +46,43 @@ export function setupAutoUpdater() {
     return
   }
 
-  if (process.platform === 'win32') {
-    console.log('[updater] Windows: auto-update vypnuto (chybí podpis).')
-    return
-  }
-
   autoUpdater.on('update-available', (info) => {
+    const version = info?.version || '?'
+
+    if (autoInstallSupported()) {
+      dialog
+        .showMessageBox({
+          type: 'info',
+          title: 'Dostupná aktualizace',
+          message: `Je dostupná nová verze ${version}.`,
+          detail: 'Chcete ji stáhnout a nainstalovat? Po stažení se aplikace restartuje.',
+          buttons: ['Ano', 'Ne'],
+          defaultId: 0,
+          cancelId: 1,
+        })
+        .then((result) => {
+          if (result.response === 0) autoUpdater.downloadUpdate()
+        })
+        .finally(() => {
+          manualCheck = false
+        })
+      return
+    }
+
+    // Windows (a jiné): jen info + odkaz na Releases
     dialog
       .showMessageBox({
         type: 'info',
         title: 'Dostupná aktualizace',
-        message: `Je dostupná nová verze ${info.version}.`,
-        detail: 'Chcete ji stáhnout a nainstalovat? Po stažení se aplikace restartuje.',
-        buttons: ['Ano', 'Ne'],
+        message: `Je dostupná nová verze ${version}.`,
+        detail:
+          'Automatická instalace na Windows není k dispozici (chybí podpis).\n\nOtevři stránku se stažením a nainstaluj novou verzi ručně.',
+        buttons: ['Otevřít stahování', 'Později'],
         defaultId: 0,
         cancelId: 1,
       })
       .then((result) => {
-        if (result.response === 0) autoUpdater.downloadUpdate()
+        if (result.response === 0) openDownloadPage(version)
       })
       .finally(() => {
         manualCheck = false
@@ -69,6 +104,7 @@ export function setupAutoUpdater() {
   })
 
   autoUpdater.on('update-downloaded', () => {
+    if (!autoInstallSupported()) return
     dialog
       .showMessageBox({
         type: 'info',
@@ -91,14 +127,14 @@ export function setupAutoUpdater() {
     manualCheck = false
     dialog.showErrorBox(
       'Chyba aktualizace',
-      `Nepodařilo se zkontrolovat nebo stáhnout aktualizaci.\n\n${err.message || err}`,
+      `Nepodařilo se zkontrolovat aktualizace.\n\n${err.message || err}`,
     )
   })
 }
 
-/** Tichá kontrola po startu (jen macOS packaged). */
+/** Tichá kontrola po startu (packaged mac + win). */
 export function scheduleUpdateCheck(delayMs = 5000) {
-  if (!updatesSupported()) return
+  if (!updateCheckSupported()) return
   setTimeout(() => {
     manualCheck = false
     autoUpdater.checkForUpdates().catch((err) => {
@@ -115,13 +151,6 @@ export async function checkForUpdatesManual() {
       message: 'Kontrola aktualizací funguje jen v nainstalované (buildnuté) aplikaci.',
     }
   }
-  if (process.platform === 'win32') {
-    return {
-      ok: false,
-      message: 'Autoaktualizace je na Windows vypnutá. Stáhni release z GitHubu.',
-      downloadUrl: 'https://github.com/shaman12345677/Scanner/releases',
-    }
-  }
 
   manualCheck = true
   try {
@@ -135,7 +164,7 @@ export async function checkForUpdatesManual() {
 }
 
 export function openReleasesPage() {
-  return shell.openExternal('https://github.com/shaman12345677/Scanner/releases')
+  return shell.openExternal(RELEASES_URL)
 }
 
 export function getUpdateMeta() {
@@ -143,7 +172,9 @@ export function getUpdateMeta() {
     version: app.getVersion(),
     packaged: isPackaged(),
     platform: process.platform,
-    autoUpdateEnabled: updatesSupported(),
-    releasesUrl: 'https://github.com/shaman12345677/Scanner/releases',
+    updateCheckEnabled: updateCheckSupported(),
+    autoInstallEnabled: autoInstallSupported(),
+    autoUpdateEnabled: autoInstallSupported(),
+    releasesUrl: RELEASES_URL,
   }
 }
