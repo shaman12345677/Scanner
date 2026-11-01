@@ -19,7 +19,8 @@
     "electron:build:mac": "node scripts/build-ssid-helper.mjs && vite build && electron-builder --mac -p never",
     "electron:publish:mac": "node scripts/build-ssid-helper.mjs && vite build && electron-builder --mac -p always",
     "electron:build:mac:dir": "node scripts/build-ssid-helper.mjs && vite build && CSC_IDENTITY_AUTO_DISCOVERY=false electron-builder --mac --dir -p never",
-    "electron:build:win": "vite build && electron-builder --win -p never"
+    "electron:build:win": "vite build && CSC_IDENTITY_AUTO_DISCOVERY=false electron-builder --win -p never",
+    "electron:publish:win": "vite build && CSC_IDENTITY_AUTO_DISCOVERY=false electron-builder --win -p always"
   },
   "repository": {
     "type": "git",
@@ -54,12 +55,6 @@
       "electron/helpers/*.dylib",
       "node_modules/koffi/**/*"
     ],
-    "extraResources": [
-      {
-        "from": "electron/helpers/libscanerssid.dylib",
-        "to": "helpers/libscanerssid.dylib"
-      }
-    ],
     "mac": {
       "category": "public.app-category.utilities",
       "icon": "build/icon.icns",
@@ -76,6 +71,12 @@
         ".*\\.lproj/.*"
       ],
       "notarize": false,
+      "extraResources": [
+        {
+          "from": "electron/helpers/libscanerssid.dylib",
+          "to": "helpers/libscanerssid.dylib"
+        }
+      ],
       "extendInfo": {
         "NSLocalNetworkUsageDescription": "Scaner IP potřebuje přístup k místní síti, aby našel zařízení, MAC adresy a otevřené služby.",
         "NSLocationWhenInUseUsageDescription": "Scaner IP potřebuje přístup k poloze jen proto, aby na macOS mohl zobrazit název Wi‑Fi sítě, ke které jsi připojený.",
@@ -88,6 +89,7 @@
     },
     "win": {
       "icon": "build/icon.ico",
+      "signAndEditExecutable": false,
       "target": [
         {
           "target": "nsis",
@@ -102,6 +104,12 @@
           ]
         }
       ]
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true
     }
   },
   "dependencies": {
