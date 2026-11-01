@@ -20,6 +20,13 @@ import {
   buildIdentity,
   decorateServices,
 } from './vendors.js'
+import {
+  setupAutoUpdater,
+  scheduleUpdateCheck,
+  checkForUpdatesManual,
+  openReleasesPage,
+  getUpdateMeta,
+} from './updater.js'
 
 const execFileAsync = promisify(execFile)
 const reverseAsync = promisify(reverse)
@@ -1478,6 +1485,10 @@ ipcMain.handle('wake-on-lan', async (_, payload = {}) => {
   return { success: true, targets: [...targets] }
 })
 
+ipcMain.handle('get-update-meta', () => getUpdateMeta())
+ipcMain.handle('check-for-updates', () => checkForUpdatesManual())
+ipcMain.handle('open-releases-page', () => openReleasesPage())
+
 ipcMain.handle('refresh-device-status', async (_, ips = []) => {
   const list = (Array.isArray(ips) ? ips : [])
     .map((ip) => String(ip || '').trim())
@@ -2147,6 +2158,8 @@ app.whenReady().then(async () => {
   ))
 
   createWindow()
+  setupAutoUpdater()
+  scheduleUpdateCheck(5000)
   // Ask for Local Network as soon as UI is up.
   setTimeout(async () => {
     try {

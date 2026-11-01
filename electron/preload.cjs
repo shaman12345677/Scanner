@@ -22,6 +22,9 @@ contextBridge.exposeInMainWorld('scaner', {
   stopSpeedTest: () => ipcRenderer.invoke('stop-speed-test'),
   wakeOnLan: (payload) => ipcRenderer.invoke('wake-on-lan', payload || {}),
   refreshDeviceStatus: (ips) => ipcRenderer.invoke('refresh-device-status', ips || []),
+  getUpdateMeta: () => ipcRenderer.invoke('get-update-meta'),
+  checkForUpdates: () => ipcRenderer.invoke('check-for-updates'),
+  openReleasesPage: () => ipcRenderer.invoke('open-releases-page'),
   onScanUpdate: (handler) => {
     const listener = (_event, data) => handler(data)
     ipcRenderer.on('scan-update', listener)

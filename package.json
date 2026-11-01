@@ -17,15 +17,28 @@
     "build:ssid-helper": "node scripts/build-ssid-helper.mjs",
     "electron:build": "node scripts/build-ssid-helper.mjs && vite build && electron-builder",
     "electron:build:mac": "node scripts/build-ssid-helper.mjs && vite build && electron-builder --mac -p never",
+    "electron:publish:mac": "node scripts/build-ssid-helper.mjs && vite build && electron-builder --mac -p always",
     "electron:build:mac:dir": "node scripts/build-ssid-helper.mjs && vite build && CSC_IDENTITY_AUTO_DISCOVERY=false electron-builder --mac --dir -p never",
     "electron:build:win": "vite build && electron-builder --win -p never"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/shaman12345677/Scanner.git"
   },
   "build": {
     "appId": "cz.samek.scanerip",
     "productName": "Scaner IP",
     "afterPack": "scripts/after-pack-clean.cjs",
     "afterSign": "notarize.cjs",
-    "publish": null,
+    "publish": [
+      {
+        "provider": "github",
+        "owner": "shaman12345677",
+        "repo": "Scanner",
+        "releaseType": "release",
+        "publishAutoUpdate": true
+      }
+    ],
     "directories": {
       "output": "/tmp/ScanerIP-dist",
       "buildResources": "build"
@@ -92,6 +105,8 @@
     }
   },
   "dependencies": {
+    "electron-log": "^5.4.4",
+    "electron-updater": "^6.8.11",
     "koffi": "^3.3.6",
     "react": "^19.1.0",
     "react-dom": "^19.1.0"
