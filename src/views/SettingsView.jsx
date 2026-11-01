@@ -72,7 +72,7 @@ export default function SettingsView({ range, onChange, onReset, autoScan, onAut
           <p>Verze: {meta?.version || '—'}</p>
           <p>
             {meta?.autoUpdateEnabled
-              ? 'Po startu se kontrolují GitHub Releases (stejně jako u QR Text).'
+              ? 'Po startu se kontrolují GitHub Releases.'
               : meta?.packaged
                 ? 'Autoaktualizace na této platformě není aktivní.'
                 : 'V režimu vývoje se aktualizace nekontrolují — až v notarizovaném buildu.'}
