@@ -47,13 +47,15 @@ const __dirname = path.dirname(__filename)
 
 function resolveAppIcon() {
   const candidates = [
+    process.resourcesPath ? path.join(process.resourcesPath, 'icon.ico') : null,
+    process.resourcesPath ? path.join(process.resourcesPath, 'icon.png') : null,
+    process.resourcesPath ? path.join(process.resourcesPath, 'icon.icns') : null,
     path.join(__dirname, '..', 'build', process.platform === 'win32' ? 'icon.ico' : 'icon.icns'),
     path.join(__dirname, '..', 'build', 'icon.png'),
     path.join(__dirname, '..', 'icon.icns'),
     path.join(__dirname, '..', 'icon.ico'),
     path.join(__dirname, '..', 'public', 'icon.png'),
-    process.resourcesPath ? path.join(process.resourcesPath, 'icon.icns') : null,
-    process.resourcesPath ? path.join(process.resourcesPath, 'icon.ico') : null,
+    path.join(__dirname, '..', 'dist', 'icon.png'),
   ].filter(Boolean)
 
   for (const candidate of candidates) {

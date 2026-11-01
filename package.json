@@ -89,7 +89,6 @@
     },
     "win": {
       "icon": "build/icon.ico",
-      "signAndEditExecutable": false,
       "target": [
         {
           "target": "nsis",
@@ -103,13 +102,26 @@
             "x64"
           ]
         }
+      ],
+      "extraResources": [
+        {
+          "from": "build/icon.ico",
+          "to": "icon.ico"
+        },
+        {
+          "from": "build/icon.png",
+          "to": "icon.png"
+        }
       ]
     },
     "nsis": {
       "oneClick": false,
       "allowToChangeInstallationDirectory": true,
       "createDesktopShortcut": true,
-      "createStartMenuShortcut": true
+      "createStartMenuShortcut": true,
+      "installerIcon": "build/icon.ico",
+      "uninstallerIcon": "build/icon.ico",
+      "installerHeaderIcon": "build/icon.ico"
     }
   },
   "dependencies": {
@@ -125,6 +137,7 @@
     "dotenv": "^16.6.1",
     "electron": "^36.2.0",
     "electron-builder": "^24.9.1",
+    "png-to-ico": "^3.0.2",
     "vite": "^6.3.5"
   }
 }
