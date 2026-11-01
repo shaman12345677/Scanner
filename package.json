@@ -1,0 +1,107 @@
+{
+  "name": "scaner-ip",
+  "productName": "Scaner IP",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Síťový přehled a inventář zařízení",
+  "author": {
+    "name": "Tomáš Samek"
+  },
+  "type": "module",
+  "main": "electron/main.js",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "electron": "electron .",
+    "start": "node scripts/dev.mjs",
+    "build:ssid-helper": "node scripts/build-ssid-helper.mjs",
+    "electron:build": "node scripts/build-ssid-helper.mjs && vite build && electron-builder",
+    "electron:build:mac": "node scripts/build-ssid-helper.mjs && vite build && electron-builder --mac -p never",
+    "electron:build:mac:dir": "node scripts/build-ssid-helper.mjs && vite build && CSC_IDENTITY_AUTO_DISCOVERY=false electron-builder --mac --dir -p never",
+    "electron:build:win": "vite build && electron-builder --win -p never"
+  },
+  "build": {
+    "appId": "cz.samek.scanerip",
+    "productName": "Scaner IP",
+    "afterPack": "scripts/after-pack-clean.cjs",
+    "afterSign": "notarize.cjs",
+    "publish": null,
+    "directories": {
+      "output": "/tmp/ScanerIP-dist",
+      "buildResources": "build"
+    },
+    "files": [
+      "dist/**/*",
+      "electron/**/*",
+      "!electron/helpers/**/*.swift",
+      "node_modules/koffi/**/*",
+      "package.json"
+    ],
+    "asarUnpack": [
+      "electron/helpers/*.dylib",
+      "node_modules/koffi/**/*"
+    ],
+    "extraResources": [
+      {
+        "from": "electron/helpers/libscanerssid.dylib",
+        "to": "helpers/libscanerssid.dylib"
+      }
+    ],
+    "mac": {
+      "category": "public.app-category.utilities",
+      "icon": "build/icon.icns",
+      "target": [
+        "dmg",
+        "zip"
+      ],
+      "hardenedRuntime": true,
+      "gatekeeperAssess": false,
+      "entitlements": "build/entitlements.mac.plist",
+      "entitlementsInherit": "build/entitlements.mac.plist",
+      "signIgnore": [
+        "node_modules",
+        ".*\\.lproj/.*"
+      ],
+      "notarize": false,
+      "extendInfo": {
+        "NSLocalNetworkUsageDescription": "Scaner IP potřebuje přístup k místní síti, aby našel zařízení, MAC adresy a otevřené služby.",
+        "NSLocationWhenInUseUsageDescription": "Scaner IP potřebuje přístup k poloze jen proto, aby na macOS mohl zobrazit název Wi‑Fi sítě, ke které jsi připojený.",
+        "NSLocationUsageDescription": "Scaner IP potřebuje přístup k poloze jen proto, aby na macOS mohl zobrazit název Wi‑Fi sítě, ke které jsi připojený.",
+        "NSBonjourServices": [
+          "_http._tcp.",
+          "_ssh._tcp."
+        ]
+      }
+    },
+    "win": {
+      "icon": "build/icon.ico",
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        },
+        {
+          "target": "portable",
+          "arch": [
+            "x64"
+          ]
+        }
+      ]
+    }
+  },
+  "dependencies": {
+    "koffi": "^3.3.6",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0"
+  },
+  "devDependencies": {
+    "@electron/notarize": "^1.2.4",
+    "@vitejs/plugin-react": "^4.4.1",
+    "dotenv": "^16.6.1",
+    "electron": "^36.2.0",
+    "electron-builder": "^24.9.1",
+    "vite": "^6.3.5"
+  }
+}

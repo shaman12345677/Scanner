@@ -1,0 +1,29 @@
+---
+description: Notarizace Electron macOS (Developer ID + notarytool) — credentials a ověřený postup
+alwaysApply: true
+---
+
+# Notarizace (Scaner IP / Electron)
+
+Detail: `notarizace.md` · skill: `/Users/samekt/Documents/programovani/Podpis/skills/notarizace/` · zdroj: `Podpis/noterizace.txt`
+
+## Credentials
+
+- Team: `5VL45NGMHA` · Key ID: `248C9LR3S4` · Issuer: `64ad6492-e2fe-4973-9b41-79217eaaa6c5`
+- `.env.build` + `build/AuthKey_248C9LR3S4.p8` (necommitovat)
+- Cert: Developer ID Application (5VL45NGMHA)
+
+## Build
+
+- `npm run electron:build:mac` → výstup `/tmp/ScanerIP-dist` (ne Documents — `com.apple.provenance`)
+- `afterSign`: `notarize.cjs` · `mac.notarize: false` · `-p never`
+- Entitlements: `build/entitlements.mac.plist` · afterPack čistí xattr
+
+## Ověření
+
+```bash
+xcrun stapler validate "/tmp/ScanerIP-dist/mac-arm64/Scaner IP.app"
+spctl --assess --verbose=4 --type execute "/tmp/ScanerIP-dist/mac-arm64/Scaner IP.app"
+```
+
+Očekávej: `accepted` / `Notarized Developer ID`.
