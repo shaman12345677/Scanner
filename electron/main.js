@@ -11,7 +11,7 @@ import net from 'net'
 import dgram from 'dgram'
 import https from 'https'
 import { Buffer } from 'buffer'
-import koffi from 'koffi'
+import { createRequire } from 'module'
 import {
   vendorFromMac,
   resolveVendor,
@@ -20,6 +20,18 @@ import {
   buildIdentity,
   decorateServices,
 } from './vendors.js'
+
+// koffi jen pro macOS SSID — na Windows se nesmí načítat (chybí native binary při cross-buildu).
+const require = createRequire(import.meta.url)
+function loadKoffi() {
+  if (process.platform !== 'darwin') return null
+  try {
+    return require('koffi')
+  } catch (err) {
+    console.warn('[ssid] koffi nedostupné:', err?.message || err)
+    return null
+  }
+}
 import {
   setupAutoUpdater,
   scheduleUpdateCheck,
@@ -761,8 +773,9 @@ function readWifiSsidInProcess() {
   if (process.platform !== 'darwin') return null
   try {
     if (!ssidDylibFn) {
+      const koffi = loadKoffi()
       const libPath = resolveSsidDylibPath()
-      if (!libPath) return null
+      if (!koffi || !libPath) return null
       const lib = koffi.load(libPath)
       ssidDylibFn = lib.func('scaner_wifi_ssid', 'int', ['char *', 'int'])
     }
